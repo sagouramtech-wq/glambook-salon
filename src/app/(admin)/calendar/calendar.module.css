@@ -1,0 +1,205 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background-color: var(--bg-background, #0A0A0F);
+  color: var(--text-primary, #FFFFFF);
+  overflow: hidden;
+}
+
+.content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding-bottom: 72px; /* space for bottom nav */
+}
+
+.dateScroller {
+  display: flex;
+  gap: 12px;
+  padding: 16px;
+  overflow-x: auto;
+  scrollbar-width: none; /* Firefox */
+  background-color: var(--bg-surface, #141420);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.dateScroller::-webkit-scrollbar {
+  display: none; /* Chrome/Safari */
+}
+
+.dateItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 56px;
+  height: 64px;
+  border-radius: 12px;
+  background-color: transparent;
+  color: var(--text-muted, #9A9AB0);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid transparent;
+}
+
+.dateItem.active {
+  background-color: rgba(201, 168, 76, 0.1);
+  border-color: var(--gold-primary, #C9A84C);
+  color: var(--gold-primary, #C9A84C);
+}
+
+.dayName {
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.dayNumber {
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.timelineContainer {
+  flex: 1;
+  overflow-y: auto;
+  position: relative;
+  padding: 16px 16px 32px 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+.timeRow {
+  display: flex;
+  min-height: 80px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.timeLabel {
+  width: 60px;
+  font-size: 0.875rem;
+  color: var(--text-muted, #9A9AB0);
+  padding-top: 8px;
+  padding-right: 16px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.timeSlot {
+  flex: 1;
+  position: relative;
+  border-left: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.emptySlot {
+  width: calc(100% - 16px);
+  height: calc(100% - 16px);
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.emptySlot:hover {
+  border-color: var(--gold-primary, #C9A84C);
+  color: var(--gold-primary, #C9A84C);
+  background-color: rgba(201, 168, 76, 0.05);
+}
+
+.emptyIcon {
+  font-size: 1.5rem;
+}
+
+.appointment {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  left: 8px;
+  right: 8px;
+  border-radius: 8px;
+  padding: 8px 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background-color: var(--bg-card, #1A1A2E);
+  border-left: 4px solid;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  z-index: 10;
+}
+
+.appointment:hover {
+  transform: translateY(-2px);
+}
+
+.clientName {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary, #FFFFFF);
+  margin-bottom: 2px;
+}
+
+.serviceInfo {
+  font-size: 0.75rem;
+  color: var(--text-muted, #9A9AB0);
+}
+
+/* Appointment colors by stylist */
+.stylistA {
+  border-left-color: #4A90E2; /* Blue */
+}
+
+.stylistB {
+  border-left-color: #E24A9A; /* Pink */
+}
+
+.stylistC {
+  border-left-color: #4AE290; /* Green */
+}
+
+.fab {
+  position: fixed;
+  bottom: 88px;
+  right: 24px;
+  background-color: var(--gold-primary, #C9A84C);
+  color: #000;
+  border: none;
+  border-radius: 28px;
+  padding: 0 20px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  box-shadow: 0 4px 16px rgba(201, 168, 76, 0.3);
+  cursor: pointer;
+  z-index: 100;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.fab:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(201, 168, 76, 0.4);
+}
+
+.fab:active {
+  transform: scale(0.95);
+}
+
+.fabIcon {
+  font-size: 1.25rem;
+  font-weight: bold;
+}

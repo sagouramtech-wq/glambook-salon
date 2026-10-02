@@ -1,0 +1,139 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: var(--background, #0A0A0F);
+  color: var(--text-primary, #FFFFFF);
+  padding-bottom: 80px; /* Space for BottomNav */
+}
+
+.content {
+  padding: 16px;
+  flex: 1;
+}
+
+.metricsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.sectionTitle {
+  font-family: var(--font-headline, 'Playfair Display', serif);
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: var(--text-primary, #FFFFFF);
+}
+
+.appointmentsList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.appointmentCard {
+  background-color: var(--surface, #141420);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.appointmentCard:active {
+  transform: scale(0.98);
+}
+
+.appointmentHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.time {
+  font-weight: 600;
+  color: var(--primary-gold, #C9A84C);
+  font-size: 1rem;
+}
+
+.status {
+  font-size: 0.75rem;
+  padding: 4px 8px;
+  border-radius: 24px;
+  font-weight: 500;
+}
+
+.statusConfirmed {
+  background-color: rgba(76, 175, 80, 0.1);
+  color: var(--success, #4CAF50);
+  border: 1px solid rgba(76, 175, 80, 0.2);
+}
+
+.statusPending {
+  background-color: rgba(255, 152, 0, 0.1);
+  color: var(--warning, #FF9800);
+  border: 1px solid rgba(255, 152, 0, 0.2);
+}
+
+.clientInfo {
+  font-size: 1.125rem;
+  font-weight: 500;
+  color: var(--text-primary, #FFFFFF);
+}
+
+.serviceInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.875rem;
+  color: var(--text-muted, #9A9AB0);
+}
+
+.stylist {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--text-subtle, #6B6B80);
+}
+
+.quickActions {
+  display: flex;
+  overflow-x: auto;
+  gap: 12px;
+  padding-bottom: 8px;
+  /* Hide scrollbar */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.quickActions::-webkit-scrollbar {
+  display: none;
+}
+
+.actionButton {
+  background: transparent;
+  border: 1px solid var(--primary-gold, #C9A84C);
+  color: var(--primary-gold, #C9A84C);
+  padding: 8px 20px;
+  border-radius: 24px;
+  font-size: 0.875rem;
+  font-family: var(--font-body, 'DM Sans', sans-serif);
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.actionButton:active {
+  background-color: rgba(201, 168, 76, 0.1);
+  transform: scale(0.96);
+}

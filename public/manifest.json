@@ -1,0 +1,23 @@
+{
+  "name": "Rishi Hairstyles - Men's & Beauty Salon",
+  "short_name": "Rishi Hairstyles",
+  "description": "Premium Salon Booking and Management.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0A0A0F",
+  "theme_color": "#C9A84C",
+  "icons": [
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

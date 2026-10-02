@@ -1,0 +1,171 @@
+.container {
+  min-height: 100vh;
+  background-color: var(--bg);
+  color: var(--text);
+  padding-bottom: 80px;
+}
+
+.topBar {
+  display: flex;
+  align-items: center;
+  padding: 1.5rem;
+  background: rgba(20, 20, 32, 0.8);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.backBtn {
+  background: none;
+  border: none;
+  color: var(--text);
+  font-size: 1.5rem;
+  margin-right: 1rem;
+  cursor: pointer;
+  padding: 0;
+}
+
+.title {
+  font-family: var(--font-heading);
+  font-size: 1.25rem;
+  margin: 0;
+  color: var(--text);
+}
+
+.content {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.summaryCard {
+  background: linear-gradient(135deg, rgba(201, 168, 76, 0.15) 0%, rgba(26, 26, 46, 0.8) 100%);
+  border: 1px solid var(--primary);
+  border-radius: 20px;
+  padding: 2rem;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(201, 168, 76, 0.1);
+}
+
+.summaryLabel {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.summaryValue {
+  font-family: var(--font-heading);
+  font-size: 2.5rem;
+  color: var(--primary);
+  margin: 0;
+}
+
+.summaryTrend {
+  color: #4CAF50;
+  font-size: 0.85rem;
+  font-weight: bold;
+  margin-top: 0.5rem;
+  display: inline-block;
+}
+
+.chartContainer {
+  background: var(--surface);
+  border-radius: 16px;
+  padding: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.chartTitle {
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  margin: 0 0 1.5rem 0;
+  color: var(--text);
+}
+
+.chartBars {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  height: 150px;
+  margin-bottom: 1rem;
+}
+
+.barCol {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 14%;
+}
+
+.bar {
+  width: 80%;
+  background: var(--primary);
+  border-radius: 4px 4px 0 0;
+  opacity: 0.5;
+  transition: opacity 0.3s;
+}
+
+.bar.active {
+  opacity: 1;
+  background: linear-gradient(180deg, var(--primary) 0%, var(--primary-dark) 100%);
+}
+
+.barLabel {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 0.5rem;
+}
+
+.breakdownList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.breakdownItem {
+  display: flex;
+  align-items: center;
+  background: var(--surface);
+  padding: 1rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.breakdownIcon {
+  width: 40px;
+  height: 40px;
+  background: rgba(201, 168, 76, 0.1);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  margin-right: 1rem;
+}
+
+.breakdownInfo {
+  flex: 1;
+}
+
+.breakdownName {
+  margin: 0 0 0.2rem 0;
+  font-size: 1rem;
+  color: var(--text);
+}
+
+.breakdownPercent {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.breakdownAmount {
+  font-weight: bold;
+  color: var(--primary);
+  font-size: 1rem;
+}

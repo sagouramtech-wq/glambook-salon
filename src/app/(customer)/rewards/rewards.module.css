@@ -1,0 +1,209 @@
+.container {
+  min-height: 100vh;
+  background-color: var(--background-color, #0A0A0F);
+  color: var(--text-primary, #FFFFFF);
+  padding-bottom: 80px;
+}
+
+.topBar {
+  display: flex;
+  align-items: center;
+  padding: 16px 24px;
+  background: var(--surface-color, #141420);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.backBtn {
+  background: none;
+  border: none;
+  color: var(--text-primary, #FFFFFF);
+  font-size: 20px;
+  margin-right: 16px;
+  cursor: pointer;
+}
+
+.title {
+  font-family: var(--font-headline, 'Playfair Display', serif);
+  font-size: 20px;
+  margin: 0;
+}
+
+.content {
+  padding: 24px;
+}
+
+/* Loyalty Card */
+.loyaltyCard {
+  background: var(--card-color, #1A1A2E);
+  border-radius: 16px;
+  padding: 24px;
+  text-align: center;
+  margin-bottom: 32px;
+  border: 1px solid var(--elevated-color, #222236);
+}
+
+.pointsLabel {
+  color: var(--text-muted, #9A9AB0);
+  font-size: 14px;
+  margin: 0 0 8px 0;
+}
+
+.pointsValue {
+  font-family: var(--font-headline, 'Playfair Display', serif);
+  font-size: 48px;
+  color: var(--primary-gold, #C9A84C);
+  margin: 0 0 24px 0;
+}
+
+.progressContainer {
+  margin-bottom: 24px;
+}
+
+.progressBar {
+  height: 8px;
+  background: var(--surface-color, #141420);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.progressFill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--dark-gold, #9A7B2E), var(--primary-gold, #C9A84C));
+  border-radius: 4px;
+}
+
+.progressText {
+  font-size: 12px;
+  color: var(--text-muted, #9A9AB0);
+}
+
+.redeemBtn {
+  background: var(--primary-gold, #C9A84C);
+  color: #0A0A0F;
+  border: none;
+  border-radius: 24px;
+  padding: 12px 32px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: opacity 0.3s ease;
+}
+
+.redeemBtn:hover {
+  opacity: 0.9;
+}
+
+/* Referral Section */
+.sectionTitle {
+  font-family: var(--font-headline, 'Playfair Display', serif);
+  font-size: 20px;
+  margin: 0 0 16px 0;
+}
+
+.referralCard {
+  background: var(--surface-color, #141420);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 32px;
+}
+
+.referralText {
+  margin: 0 0 16px 0;
+  color: var(--text-muted, #9A9AB0);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.codeContainer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 2px dashed var(--primary-gold, #C9A84C);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  background: rgba(201, 168, 76, 0.05);
+}
+
+.codeValue {
+  font-size: 20px;
+  font-weight: bold;
+  letter-spacing: 2px;
+  color: var(--primary-gold, #C9A84C);
+}
+
+.copyBtn {
+  background: none;
+  border: none;
+  color: var(--text-primary, #FFFFFF);
+  cursor: pointer;
+  font-size: 18px;
+}
+
+.shareActions {
+  display: flex;
+  gap: 12px;
+}
+
+.shareBtn {
+  flex: 1;
+  background: var(--card-color, #1A1A2E);
+  border: 1px solid var(--elevated-color, #222236);
+  color: var(--text-primary, #FFFFFF);
+  padding: 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  transition: background 0.3s;
+}
+
+.shareBtn:hover {
+  background: var(--surface-color, #141420);
+}
+
+/* History List */
+.historyList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.historyItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  background: var(--surface-color, #141420);
+  border-radius: 12px;
+}
+
+.historyInfo h4 {
+  margin: 0 0 4px 0;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.historyDate {
+  margin: 0;
+  font-size: 12px;
+  color: var(--text-muted, #9A9AB0);
+}
+
+.historyPoints {
+  font-weight: bold;
+}
+
+.pointsEarned {
+  color: var(--success-color, #4CAF50);
+}
+
+.pointsRedeemed {
+  color: var(--error-color, #EF5350);
+}

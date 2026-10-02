@@ -1,0 +1,316 @@
+.container {
+  min-height: 100vh;
+  padding-bottom: 80px; /* Space for BottomNav */
+  background-color: var(--background, #0A0A0F);
+  color: var(--text, #FFFFFF);
+  overflow-x: hidden;
+}
+
+.content {
+  padding: 1rem;
+}
+
+/* Search Bar */
+.searchContainer {
+  margin-bottom: 1.5rem;
+  position: relative;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 1rem 1rem 1rem 2.5rem;
+  border-radius: 12px;
+  background-color: var(--surface, #141420);
+  border: 1px solid var(--card, #1A1A2E);
+  color: var(--text, #FFFFFF);
+  font-family: inherit;
+  font-size: 1rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: var(--primary-gold, #C9A84C);
+  box-shadow: 0 0 0 2px rgba(201, 168, 76, 0.2);
+}
+
+.searchIcon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted, #9A9AB0);
+}
+
+/* Banner Carousel */
+.bannerSection {
+  margin-bottom: 2rem;
+}
+
+.carousel {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+  gap: 1rem;
+  padding-bottom: 1rem;
+}
+
+.carousel::-webkit-scrollbar {
+  display: none;
+}
+
+.bannerCard {
+  flex: 0 0 85%;
+  height: 260px;
+  border-radius: 16px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  scroll-snap-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.bannerCard:nth-child(1) {
+  background: linear-gradient(135deg, #4A148C, var(--primary-gold, #C9A84C));
+}
+
+.bannerCard:nth-child(2) {
+  background: linear-gradient(135deg, var(--card, #1A1A2E), var(--dark-gold, #9A7B2E));
+}
+
+.bannerCard:nth-child(3) {
+  background: linear-gradient(135deg, var(--dark-gold, #9A7B2E), var(--success, #4CAF50));
+}
+
+.bannerTitle {
+  font-size: 1.25rem;
+  font-weight: 700;
+  font-family: 'Playfair Display', serif;
+  margin-bottom: 0.5rem;
+  z-index: 1;
+}
+
+.indicators {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: -0.5rem;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--surface, #141420);
+  transition: all 0.3s ease;
+}
+
+.dot.active {
+  background-color: var(--primary-gold, #C9A84C);
+  width: 16px;
+  border-radius: 4px;
+}
+
+/* Categories Grid */
+.categoriesSection {
+  margin-bottom: 2rem;
+}
+
+.sectionTitle {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.categoryGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.categoryCard {
+  background-color: var(--surface, #141420);
+  border: 1px solid var(--card, #1A1A2E);
+  border-radius: 12px;
+  padding: 1rem 0.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+}
+
+.categoryCard:hover {
+  border-color: var(--primary-gold, #C9A84C);
+  transform: translateY(-2px);
+}
+
+.categoryIcon {
+  font-size: 2rem;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.categoryCard:hover .categoryIcon {
+  transform: scale(1.2);
+}
+
+.categoryName {
+  font-size: 0.875rem;
+  color: var(--text, #FFFFFF);
+  font-weight: 500;
+}
+
+/* Popular Services */
+.popularSection {
+  margin-bottom: 2rem;
+}
+
+.servicesScroll {
+  display: flex;
+  overflow-x: auto;
+  gap: 1rem;
+  padding-bottom: 1rem;
+  scrollbar-width: none;
+}
+
+.servicesScroll::-webkit-scrollbar {
+  display: none;
+}
+
+.serviceCard {
+  flex: 0 0 240px;
+  background-color: var(--surface, #141420);
+  border-radius: 12px;
+  padding: 1rem;
+  border: 1px solid var(--card, #1A1A2E);
+}
+
+.serviceTitle {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.serviceDetails {
+  display: flex;
+  justify-content: space-between;
+  color: var(--muted, #9A9AB0);
+  font-size: 0.875rem;
+  margin-bottom: 0.75rem;
+}
+
+.servicePrice {
+  color: var(--primary-gold, #C9A84C);
+  font-weight: 700;
+  font-size: 1.125rem;
+}
+
+.serviceFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.rating {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: var(--primary-gold, #C9A84C);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.bookButton {
+  background-color: transparent;
+  border: 1px solid var(--primary-gold, #C9A84C);
+  color: var(--primary-gold, #C9A84C);
+  padding: 0.25rem 0.75rem;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.bookButton:hover {
+  background-color: var(--primary-gold, #C9A84C);
+  color: #000;
+}
+
+/* FAB */
+.fab {
+  position: fixed;
+  bottom: 80px; /* Above BottomNav */
+  right: 1.5rem;
+  background: linear-gradient(135deg, var(--light-gold, #E8D5A3), var(--primary-gold, #C9A84C));
+  color: #000;
+  border: none;
+  border-radius: 24px;
+  padding: 0.75rem 1.5rem;
+  font-weight: 700;
+  font-family: inherit;
+  font-size: 1rem;
+  box-shadow: 0 4px 12px rgba(201, 168, 76, 0.4);
+  cursor: pointer;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(201, 168, 76, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(201, 168, 76, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(201, 168, 76, 0);
+  }
+}
+
+.serviceImagePlaceholder {
+  height: 140px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, rgba(201, 168, 76, 0.1), rgba(201, 168, 76, 0.05));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+  border: 1px dashed rgba(201, 168, 76, 0.3);
+}
+
+.serviceImageEmoji {
+  font-size: 3rem;
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
+}
+
+.serviceContent {
+  display: flex;
+  flex-direction: column;
+}
+
+.serviceName {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+  color: white;
+}
+
+.servicesHorizontalScroll {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  padding-bottom: 16px;
+  scrollbar-width: none;
+}
+.servicesHorizontalScroll::-webkit-scrollbar {
+  display: none;
+}
+
