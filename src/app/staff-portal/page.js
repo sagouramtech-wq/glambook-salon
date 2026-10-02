@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styles from './staff-portal.module.css';
 import { useRouter } from 'next/navigation';
 import { LogOut, Calendar, Gift, Clock } from 'lucide-react';
