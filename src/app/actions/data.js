@@ -967,13 +967,13 @@ export async function deleteServiceCategory(id) {
   return { success: true };
 }
 
-export async function addService(name, category_id, price, duration) {
+export async function addService(name, category, price, duration_minutes) {
   const session = await getSession();
   if (!session || session.role !== 'admin') return { error: 'Unauthorized' };
 
   const { data, error } = await supabaseAdmin
     .from('services')
-    .insert([{ name, category_id, price, duration }])
+    .insert([{ name, category, price, duration_minutes, is_active: true }])
     .select();
 
   if (error) return { error: error.message };
