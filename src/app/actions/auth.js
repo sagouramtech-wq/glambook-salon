@@ -62,7 +62,7 @@ export async function loginOrRegister(prevState, formData) {
 
     if (insertError) {
       console.error(insertError);
-      return { error: 'Failed to register account.' };
+      return { error: 'Failed to register account: ' + insertError.message };
     }
 
     // Success -> Create Session
