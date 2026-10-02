@@ -1,190 +1,118 @@
 const fs = require('fs');
-let code = fs.readFileSync('src/app/(customer)/booking/page.js', 'utf8');
+let text = fs.readFileSync('src/app/(customer)/booking/page.js', 'utf8');
 
-// 1. Add states
-const stateCode = `  const [bookingType, setBookingType] = useState('salon');
-  const [homeLocation, setHomeLocation] = useState(null);
-  const [gpsLoading, setGpsLoading] = useState(false);
-  const [homeAddress, setHomeAddress] = useState('');
-  
-  const SALON_LAT = 17.3525582;
-  const SALON_LNG = 78.5519718;
+// Add import
+text = text.replace("import { getActiveServices, getActiveStaff, createAppointment } from '@/app/actions/data';", "import { getActiveServices, getActiveStaff, createAppointment, validateCoupon } from '@/app/actions/data';");
 
-  function deg2rad(deg) { return deg * (Math.PI/180); }
-  function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
-    var R = 6371;
-    var dLat = deg2rad(lat2-lat1);
-    var dLon = deg2rad(lon2-lon1); 
-    var a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.sin(dLon/2) * Math.sin(dLon/2); 
-    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
-    return R * c;
-  }
+// Add states for coupon
+const stateInsert = `  const [couponCodeInput, setCouponCodeInput] = useState('');
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
+  const [couponError, setCouponError] = useState('');
+  const [validatingCoupon, setValidatingCoupon] = useState(false);`;
+text = text.replace("const [error, setError] = useState('');", "const [error, setError] = useState('');\n" + stateInsert);
 
-  const handleDetectLocation = () => {
-    if (!navigator.geolocation) {
-      setError('Geolocation is not supported by your browser.');
-      return;
+// Add Coupon Validate Function
+const validateFn = `
+  const handleApplyCoupon = async () => {
+    if (!couponCodeInput) return;
+    setValidatingCoupon(true);
+    setCouponError('');
+    const res = await validateCoupon(couponCodeInput);
+    if (res.success) {
+      setAppliedCoupon(res.coupon);
+    } else {
+      setCouponError(res.error);
+      setAppliedCoupon(null);
     }
-    setGpsLoading(true);
-    navigator.geolocation.getCurrentPosition((position) => {
-      const lat = position.coords.latitude;
-      const lng = position.coords.longitude;
-      const dist = getDistanceFromLatLonInKm(lat, lng, SALON_LAT, SALON_LNG);
-      
-      let f = 0;
-      if (dist <= 2) f = 50;
-      else if (dist <= 5) f = 100;
-      else if (dist <= 10) f = 150;
-      
-      if (f === 0 && dist > 10) {
-        setError('Sorry, you are outside our 10km service radius. (' + dist.toFixed(1) + 'km away)');
-        setGpsLoading(false);
-        return;
-      }
-      
-      setHomeLocation({ lat, lng, distance: dist, fee: f });
-      setGpsLoading(false);
-      setError('');
-    }, (err) => {
-      setError('Failed to get location. Please enable GPS permissions.');
-      setGpsLoading(false);
-    });
-  };`;
-
-code = code.replace(/const \[error, setError\] = useState\(''\);/, "const [error, setError] = useState('');\n" + stateCode);
-
-// 2. Filter services if bookingType == 'home'
-// 'Hair Cutting', 'Hair Cutting + Beard Cutting', 'Hair Cutting + Beard Cutting + Hair Coloring', 'Hair Cutting + Hair Coloring'
-const serviceListCode = `
-            {bookingType === 'home' && !homeLocation ? (
-              <div style={{ padding: '2rem', textAlign: 'center', background: 'var(--surface)', borderRadius: '12px' }}>
-                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📍</div>
-                <h3>Check Service Availability</h3>
-                <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem', marginTop: '0.5rem' }}>We need your location to check if you are within our 10km service radius.</p>
-                <button onClick={handleDetectLocation} className={styles.btnPrimary} disabled={gpsLoading}>
-                  {gpsLoading ? 'Detecting...' : 'Detect My Location'}
-                </button>
-              </div>
-            ) : (
-              <>
-                <div className={styles.categoryTabs}>
-                  {categories.map(cat => (
-                    <button key={cat} className={\`\${styles.categoryTab} \${activeCategory === cat ? styles.categoryTabActive : ''}\`} onClick={() => setActiveCategory(cat)}>
-                      {cat}
-                    </button>
-                  ))}
-                </div>
-                <div className={styles.serviceList}>
-                  {services
-                    .filter(s => s.category === activeCategory)
-                    .filter(s => {
-                      if (bookingType === 'salon') return true;
-                      const n = s.name.split('|||')[0].trim().toLowerCase();
-                      return n === 'hair cutting' || n === 'hair cutting + beard cutting' || n === 'hair cutting + beard cutting + hair coloring' || n === 'hair cutting + hair coloring';
-                    })
-                    .map(service => (
-                      <div key={service.id} className={\`\${styles.serviceCard} \${selectedServiceId === service.id ? styles.serviceCardSelected : ''}\`} onClick={() => setSelectedServiceId(service.id)}>
-                        <div className={styles.serviceInfo}>
-                          <div className={styles.serviceName}>{service.name.split('|||')[0].trim()}</div>
-                          <div className={styles.serviceDetails}>{service.duration_minutes} min • {service.category}</div>
-                        </div>
-                        <div className={styles.servicePrice}>₹{service.price}</div>
-                      </div>
-                  ))}
-                </div>
-              </>
-            )}
+    setValidatingCoupon(false);
+  };
 `;
+text = text.replace('const handleConfirm = () => {', validateFn + '\n  const handleConfirm = () => {');
 
-const replaceStep1 = `
-        {currentStep === 1 && (
-          <div className={styles.stepContent}>
-            <h2 className={styles.sectionTitle}>Select a Service</h2>
-            
-            <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem' }}>
-              <button 
-                onClick={() => { setBookingType('salon'); setSelectedServiceId(null); setError(''); }} 
-                style={{ flex: 1, padding: '1rem', borderRadius: '8px', border: bookingType==='salon' ? '2px solid var(--primary)' : '1px solid var(--border)', background: bookingType==='salon' ? 'var(--primary-dark)' : 'var(--surface)', color: 'white' }}>
-                📍 At Salon
-              </button>
-              <button 
-                onClick={() => { setBookingType('home'); setSelectedServiceId(null); setError(''); }} 
-                style={{ flex: 1, padding: '1rem', borderRadius: '8px', border: bookingType==='home' ? '2px solid var(--primary)' : '1px solid var(--border)', background: bookingType==='home' ? 'var(--primary-dark)' : 'var(--surface)', color: 'white' }}>
-                🏠 At Home
-              </button>
-            </div>
-            ${serviceListCode}
-          </div>
-        )}
-`;
+// Update Final Price calculation
+const priceCalcSearch = `const finalPrice = (selectedService?.price || 0) + (bookingType === 'home' ? homeLocation?.fee || 0 : 0);`;
+const priceCalcReplace = `let finalPrice = (selectedService?.price || 0) + (bookingType === 'home' ? homeLocation?.fee || 0 : 0);
+        let discountAmount = 0;
+        if (appliedCoupon) {
+          if (appliedCoupon.discount_type === 'percentage') {
+            discountAmount = Math.round(finalPrice * (appliedCoupon.discount_value / 100));
+          } else {
+            discountAmount = appliedCoupon.discount_value;
+          }
+          finalPrice = Math.max(0, finalPrice - discountAmount);
+        }`;
+text = text.replace(priceCalcSearch, priceCalcReplace);
 
-code = code.replace(/\{currentStep === 1 && \([\s\S]*?\}\)/, replaceStep1.trim());
+// Pass coupon info to createAppointment
+const createAptSearch = `const result = await createAppointment({
+          serviceId: selectedServiceId,
+          staffId: selectedStylistId === 'any' ? null : selectedStylistId,
+          date: dateString,
+          time: timeString,
+          totalAmount: finalPrice,
+          notes
+        });`;
+const createAptReplace = `const result = await createAppointment({
+          serviceId: selectedServiceId,
+          staffId: selectedStylistId === 'any' ? null : selectedStylistId,
+          date: dateString,
+          time: timeString,
+          totalAmount: finalPrice,
+          notes,
+          couponCode: appliedCoupon?.code || null,
+          discountAmount: discountAmount || 0
+        });`;
+text = text.replace(createAptSearch, createAptReplace);
 
-// 3. Update Calendar for Next Day constraint
-const calendarCode = `
-                {Array.from({length: 30}, (_, i) => i + 1).map(i => {
-                  const today = new Date().getDate();
-                  const isPast = i < today;
-                  const isToday = i === today;
-                  const isDisabled = isPast || (bookingType === 'home' && isToday);
-                  return (
-                    <div 
-                      key={i} 
-                      className={\`\${styles.dayCell} \${isDisabled ? styles.dayPast : styles.dayAvailable} \${selectedDate === i ? styles.daySelected : ''}\`} 
-                      onClick={() => !isDisabled && setSelectedDate(i)}
-                      style={isDisabled ? { opacity: 0.3 } : {}}
+// Update UI
+const uiSearch = `<div className={styles.summaryRow} style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+                  <div className={styles.summaryLabel}>Total Amount</div>
+                  <div className={styles.summaryValue} style={{ color: 'var(--primary)', fontSize: '1.2rem', fontWeight: 'bold' }}>
+                    ₹{(selectedService?.price || 0) + (bookingType === 'home' ? homeLocation?.fee || 0 : 0)}
+                  </div>
+                </div>`;
+
+const uiReplace = `
+                {/* Coupon Input Area */}
+                <div style={{ marginTop: '1rem', padding: '1rem', background: 'rgba(0,0,0,0.2)', borderRadius: '12px' }}>
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <input 
+                      type="text" 
+                      placeholder="Enter Promo Code" 
+                      value={couponCodeInput}
+                      onChange={(e) => setCouponCodeInput(e.target.value.toUpperCase())}
+                      style={{ flex: 1, padding: '0.8rem', background: 'var(--bg)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: 'white', textTransform: 'uppercase' }}
+                    />
+                    <button 
+                      onClick={handleApplyCoupon}
+                      disabled={validatingCoupon}
+                      style={{ padding: '0 1rem', background: 'var(--primary)', border: 'none', borderRadius: '8px', color: 'var(--bg)', fontWeight: 'bold', cursor: 'pointer' }}
                     >
-                      {i}
+                      {validatingCoupon ? '...' : 'Apply'}
+                    </button>
+                  </div>
+                  {couponError && <div style={{ color: 'var(--error)', fontSize: '0.8rem', marginTop: '0.5rem' }}>{couponError}</div>}
+                  {appliedCoupon && <div style={{ color: 'var(--success)', fontSize: '0.8rem', marginTop: '0.5rem' }}>Promo Code Applied!</div>}
+                </div>
+
+                {appliedCoupon && (
+                  <div className={styles.summaryRow} style={{ marginTop: '1rem', color: 'var(--success)' }}>
+                    <div className={styles.summaryLabel} style={{ color: 'var(--success)' }}>Discount ({appliedCoupon.code})</div>
+                    <div className={styles.summaryValue}>
+                      - ₹{appliedCoupon.discount_type === 'percentage' 
+                        ? Math.round(((selectedService?.price || 0) + (bookingType === 'home' ? homeLocation?.fee || 0 : 0)) * (appliedCoupon.discount_value / 100))
+                        : appliedCoupon.discount_value}
                     </div>
-                  );
-                })}
-`;
-code = code.replace(/\{Array\.from\(\{length: 30\}[\s\S]*?\)\}\)/, calendarCode.trim());
+                  </div>
+                )}
 
-// 4. Update Summary & Payment
-const summaryCode = `
-              <div className={styles.summaryRow}>
-                <div className={styles.summaryLabel}>Time</div>
-                <div className={styles.summaryValue}>{selectedDate}th, {selectedTime}</div>
-              </div>
-              <div className={styles.summaryRow}>
-                <div className={styles.summaryLabel}>Location</div>
-                <div className={styles.summaryValue}>{bookingType === 'salon' ? '📍 At Salon' : '🏠 At Home'}</div>
-              </div>
-              {bookingType === 'home' && (
-                <div className={styles.summaryRow}>
-                  <div className={styles.summaryLabel}>Home Service Fee ({homeLocation?.distance?.toFixed(1)}km)</div>
-                  <div className={styles.summaryValue}>+₹{homeLocation?.fee}</div>
-                </div>
-              )}
-              {bookingType === 'home' && (
-                <div style={{ marginBottom: '1.5rem', marginTop: '1rem' }}>
-                  <input type="text" placeholder="House No, Street, Landmark" value={homeAddress} onChange={e => setHomeAddress(e.target.value)} style={{ width: '100%', padding: '1rem', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'white' }} required={bookingType === 'home'} />
-                </div>
-              )}
-              <div className={styles.totalRow}>
-                <div>Total</div>
-                <div>₹{(selectedService?.price || 0) + (bookingType === 'home' ? homeLocation?.fee || 0 : 0)}</div>
-              </div>
-`;
+                <div className={styles.summaryRow} style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+                  <div className={styles.summaryLabel}>Total Amount</div>
+                  <div className={styles.summaryValue} style={{ color: 'var(--primary)', fontSize: '1.2rem', fontWeight: 'bold' }}>
+                    ₹{Math.max(0, ((selectedService?.price || 0) + (bookingType === 'home' ? homeLocation?.fee || 0 : 0)) - (appliedCoupon ? (appliedCoupon.discount_type === 'percentage' ? Math.round(((selectedService?.price || 0) + (bookingType === 'home' ? homeLocation?.fee || 0 : 0)) * (appliedCoupon.discount_value / 100)) : appliedCoupon.discount_value) : 0))}
+                  </div>
+                </div>`;
+text = text.replace(uiSearch, uiReplace);
 
-code = code.replace(/<div className=\{styles\.summaryRow\}>\s*<div className=\{styles\.summaryLabel\}>Time<\/div>[\s\S]*?<div className=\{styles\.totalRow\}>[\s\S]*?<\/div>\s*<\/div>/, summaryCode.trim());
-
-// 5. Update Confirm params
-const confirmCode = `
-      const result = await createAppointment({
-        serviceId: selectedServiceId,
-        staffId: selectedStylistId === 'any' ? null : selectedStylistId,
-        date: dateString,
-        time: timeString,
-        totalAmount: (selectedService?.price || 0) + (bookingType === 'home' ? homeLocation?.fee || 0 : 0),
-        notes: bookingType === 'home' ? \`HOME SERVICE (Fee: ₹\${homeLocation.fee}, Dist: \${homeLocation.distance.toFixed(1)}km). Address: \${homeAddress}\` : null
-      });
-`;
-code = code.replace(/const result = await createAppointment\(\{[\s\S]*?\}\);/, confirmCode.trim());
-
-// 6. Update Button Disabled State
-const btnCode = `disabled={(currentStep === 1 && (!selectedServiceId || (bookingType === 'home' && !homeLocation))) || (currentStep === 3 && (!selectedDate || !selectedTime)) || (currentStep === 4 && bookingType === 'home' && !homeAddress)}`;
-code = code.replace(/disabled=\{\(currentStep === 1 && !selectedServiceId\) \|\| \(currentStep === 3 && \(!selectedDate \|\| !selectedTime\)\)\}/, btnCode);
-
-fs.writeFileSync('src/app/(customer)/booking/page.js', code);
+fs.writeFileSync('src/app/(customer)/booking/page.js', text);
+console.log('Booking page updated');

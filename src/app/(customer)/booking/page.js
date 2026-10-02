@@ -55,6 +55,10 @@ function BookingWizard() {
   const [bookingConfirmed, setBookingConfirmed] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState('');
+  const [couponCodeInput, setCouponCodeInput] = useState('');
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
+  const [couponError, setCouponError] = useState('');
+  const [validatingCoupon, setValidatingCoupon] = useState(false);
   
   const [bookedTimes, setBookedTimes] = useState([]);
 
@@ -148,6 +152,21 @@ function BookingWizard() {
     return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
   };
 
+  
+  const handleApplyCoupon = async () => {
+    if (!couponCodeInput) return;
+    setValidatingCoupon(true);
+    setCouponError('');
+    const res = await validateCoupon(couponCodeInput);
+    if (res.success) {
+      setAppliedCoupon(res.coupon);
+    } else {
+      setCouponError(res.error);
+      setAppliedCoupon(null);
+    }
+    setValidatingCoupon(false);
+  };
+
   const handleConfirm = () => {
     setError('');
     startTransition(async () => {
@@ -160,7 +179,16 @@ function BookingWizard() {
       if (modifier === 'PM') hours = parseInt(hours, 10) + 12;
       const timeString = `${hours}:${minutes}:00`;
 
-      const finalPrice = (selectedService?.price || 0) + (bookingType === 'home' ? homeLocation?.fee || 0 : 0);
+      let finalPrice = (selectedService?.price || 0) + (bookingType === 'home' ? homeLocation?.fee || 0 : 0);
+        let discountAmount = 0;
+        if (appliedCoupon) {
+          if (appliedCoupon.discount_type === 'percentage') {
+            discountAmount = Math.round(finalPrice * (appliedCoupon.discount_value / 100));
+          } else {
+            discountAmount = appliedCoupon.discount_value;
+          }
+          finalPrice = Math.max(0, finalPrice - discountAmount);
+        }
       const notes = bookingType === 'home' ? `HOME SERVICE (Fee: ₹${homeLocation.fee}, Dist: ${homeLocation.distance.toFixed(1)}km). Address: ${homeAddress}` : null;
 
       const result = await createAppointment({

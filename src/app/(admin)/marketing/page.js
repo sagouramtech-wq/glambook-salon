@@ -16,9 +16,16 @@ import {
 import styles from './marketing.module.css';
 import TopBar from '@/components/TopBar/TopBar';
 import BottomNav from '@/components/BottomNav/BottomNav';
-import { addOffer, getAllOffers, toggleOfferStatus, deleteOffer, sendPushNotification, getPushNotifications } from '@/app/actions/data';
+import { addOffer, getAllOffers, toggleOfferStatus, deleteOffer, sendPushNotification, getPushNotifications, getActiveCoupons, addCoupon, deleteCoupon } from '@/app/actions/data';
 
 export default function MarketingHub() {
+    const [coupons, setCoupons] = useState([]);
+  const [loadingCoupons, setLoadingCoupons] = useState(true);
+  const [showCouponModal, setShowCouponModal] = useState(false);
+  const [couponCode, setCouponCode] = useState('');
+  const [couponType, setCouponType] = useState('percentage');
+  const [couponValue, setCouponValue] = useState('');
+
   const [offers, setOffers] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -39,8 +46,16 @@ export default function MarketingHub() {
 
   useEffect(() => {
     loadOffers();
+    loadCoupons();
     loadNotifications();
   }, []);
+
+    const loadCoupons = async () => {
+    setLoadingCoupons(true);
+    const data = await getActiveCoupons();
+    setCoupons(data);
+    setLoadingCoupons(false);
+  };
 
   const loadNotifications = async () => {
     setLoadingNotifications(true);
@@ -70,6 +85,29 @@ export default function MarketingHub() {
       alert(res.error || 'Failed to add offer');
     }
     setIsSubmitting(false);
+  };
+
+    const handleAddCoupon = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    const res = await addCoupon(couponCode, couponType, parseFloat(couponValue));
+    if (res.success) {
+      alert('Coupon created!');
+      setShowCouponModal(false);
+      setCouponCode('');
+      setCouponValue('');
+      loadCoupons();
+    } else {
+      alert(res.error || 'Failed to create coupon');
+    }
+    setIsSubmitting(false);
+  };
+
+  const handleDeleteCoupon = async (id) => {
+    if (confirm('Delete this coupon?')) {
+      const res = await deleteCoupon(id);
+      if (res.success) loadCoupons();
+    }
   };
 
   const handleToggleOffer = async (id, currentStatus) => {
@@ -182,6 +220,39 @@ export default function MarketingHub() {
                       <Edit size={18} />
                     </button>
                     <button className={styles.iconButton} aria-label="Delete offer" onClick={() => handleDeleteOffer(offer.id)}>
+                      <Trash2 size={18} />
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </section>
+
+        
+        {/* Coupon Codes Section */}
+        <section className={styles.section}>
+          <div className={styles.sectionHeader}>
+            <h2 className={styles.sectionTitle}>Coupon Codes</h2>
+            <button className={styles.primaryButton} onClick={() => setShowCouponModal(true)}>
+              <Plus size={16} /> Create Code
+            </button>
+          </div>
+          
+          <div className={styles.card}>
+            {loadingCoupons ? (
+              <div style={{ padding: '1rem', color: 'var(--text-muted)' }}>Loading...</div>
+            ) : coupons.length === 0 ? (
+              <div style={{ padding: '1rem', color: 'var(--text-muted)' }}>No coupons yet.</div>
+            ) : (
+              coupons.map(coupon => (
+                <div key={coupon.id} className={styles.offerCard}>
+                  <div className={styles.offerInfo}>
+                    <h3 style={{letterSpacing: '2px', color: 'var(--primary)'}}>{coupon.code}</h3>
+                    <p>{coupon.discount_type === 'percentage' ? `${coupon.discount_value}% OFF` : `₹${coupon.discount_value} OFF`}</p>
+                  </div>
+                  <div className={styles.offerActions}>
+                    <button className={styles.iconButton} onClick={() => handleDeleteCoupon(coupon.id)}>
                       <Trash2 size={18} />
                     </button>
                   </div>
@@ -320,6 +391,35 @@ export default function MarketingHub() {
           </div>
         </section>
       </main>
+
+      
+      {/* Coupon Modal */}
+      {showCouponModal && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+          zIndex: 1000, padding: '1rem'
+        }}>
+          <div style={{
+            background: 'var(--card)', width: '100%', maxWidth: '400px',
+            borderRadius: '24px', padding: '1.5rem', border: '1px solid rgba(255,255,255,0.1)'
+          }}>
+            <h2 style={{ margin: '0 0 1rem 0', color: 'var(--text)' }}>Create Coupon</h2>
+            <form onSubmit={handleAddCoupon} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <input type="text" required placeholder="Code (e.g. MONDAY25)" value={couponCode} onChange={e => setCouponCode(e.target.value)} style={{ background: 'var(--bg)', border: '1px solid rgba(255,255,255,0.1)', padding: '12px', borderRadius: '12px', color: 'white', textTransform: 'uppercase' }} />
+              <select value={couponType} onChange={e => setCouponType(e.target.value)} style={{ background: 'var(--bg)', border: '1px solid rgba(255,255,255,0.1)', padding: '12px', borderRadius: '12px', color: 'white' }}>
+                <option value="percentage">Percentage (%)</option>
+                <option value="flat">Flat Amount (₹)</option>
+              </select>
+              <input type="number" required placeholder={couponType === 'percentage' ? 'e.g. 25' : 'e.g. 150'} value={couponValue} onChange={e => setCouponValue(e.target.value)} style={{ background: 'var(--bg)', border: '1px solid rgba(255,255,255,0.1)', padding: '12px', borderRadius: '12px', color: 'white' }} />
+              <div style={{ display: 'flex', gap: '1rem' }}>
+                <button type="button" onClick={() => setShowCouponModal(false)} style={{ flex: 1, padding: '12px', background: 'transparent', border: '1px solid var(--text-muted)', color: 'var(--text-muted)', borderRadius: '12px' }}>Cancel</button>
+                <button type="submit" disabled={isSubmitting} style={{ flex: 1, padding: '12px', background: 'var(--primary)', border: 'none', color: 'var(--bg)', borderRadius: '12px', fontWeight: 'bold' }}>Create</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Offer Modal */}
       {showOfferModal && (

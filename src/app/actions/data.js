@@ -66,7 +66,7 @@ export async function createAppointment(bookingData) {
     return { error: 'Not authenticated' };
   }
 
-  const { serviceId, staffId, date, time, totalAmount, notes } = bookingData;
+  const { serviceId, staffId, date, time, totalAmount, notes, couponCode, discountAmount } = bookingData;
 
   const { data, error } = await supabaseAdmin
     .from('appointments')
@@ -1199,3 +1199,72 @@ export async function getAllOrders() {
   return data || [];
 }
 
+
+// ==========================================
+// COUPON ACTIONS
+// ==========================================
+
+export async function addCoupon(code, discount_type, discount_value) {
+  const session = await getSession();
+  if (!session || session.role !== 'admin') return { error: 'Not authorized' };
+
+  const { error } = await supabaseAdmin
+    .from('coupons')
+    .insert([{ 
+      code: code.toUpperCase(), 
+      discount_type, 
+      discount_value, 
+      is_active: true 
+    }]);
+
+  if (error) {
+    console.error('Error adding coupon:', error);
+    return { error: 'Failed to add coupon. Code might already exist.' };
+  }
+  return { success: true };
+}
+
+export async function getActiveCoupons() {
+  const { data, error } = await supabaseAdmin
+    .from('coupons')
+    .select('*')
+    .eq('is_active', true)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching coupons:', error);
+    return [];
+  }
+  return data || [];
+}
+
+export async function validateCoupon(code) {
+  if (!code) return { error: 'No code provided' };
+
+  const { data, error } = await supabaseAdmin
+    .from('coupons')
+    .select('*')
+    .eq('code', code.toUpperCase())
+    .eq('is_active', true)
+    .single();
+
+  if (error || !data) {
+    return { error: 'Invalid or expired coupon code' };
+  }
+  
+  return { success: true, coupon: data };
+}
+
+export async function deleteCoupon(id) {
+  const session = await getSession();
+  if (!session || session.role !== 'admin') return { error: 'Not authorized' };
+
+  // Soft delete
+  const { error } = await supabaseAdmin
+    .from('coupons')
+    .update({ is_active: false })
+    .eq('id', id);
+
+  if (error) return { error: error.message };
+  return { success: true };
+}
