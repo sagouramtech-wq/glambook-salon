@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import styles from './subscriptions.module.css';
 import { getAllSubscriptionPlans, createSubscriptionPlan, toggleSubscriptionPlan, deleteSubscriptionPlan } from '@/app/actions/data';
 import { Trash2 } from 'lucide-react';
+import BottomNav from '@/components/BottomNav';
 
 export default function AdminSubscriptionsPage() {
   const [plans, setPlans] = useState([]);
@@ -178,6 +179,7 @@ export default function AdminSubscriptionsPage() {
           </div>
         </div>
       )}
+      <BottomNav active="more" variant="admin" />
     </div>
   );
 }
