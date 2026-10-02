@@ -999,7 +999,7 @@ export async function deleteService(id) {
 
   const { error } = await supabaseAdmin
     .from('services')
-    .delete()
+    .update({ is_active: false })
     .eq('id', id);
 
   if (error) return { error: error.message };
