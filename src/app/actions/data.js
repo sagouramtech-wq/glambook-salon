@@ -66,7 +66,7 @@ export async function createAppointment(bookingData) {
     return { error: 'Not authenticated' };
   }
 
-  const { serviceId, staffId, date, time, totalAmount } = bookingData;
+  const { serviceId, staffId, date, time, totalAmount, notes } = bookingData;
 
   const { data, error } = await supabaseAdmin
     .from('appointments')
@@ -78,7 +78,8 @@ export async function createAppointment(bookingData) {
       start_time: time,
       total_amount: totalAmount,
       status: 'pending',
-      payment_status: 'pay_at_salon'
+      payment_status: 'pay_at_salon',
+      notes: notes || null
     }])
     .select()
     .single();

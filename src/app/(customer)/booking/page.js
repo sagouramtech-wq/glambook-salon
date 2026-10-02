@@ -8,6 +8,19 @@ import { getActiveServices, getActiveStaff, createAppointment, getAppointmentsBy
 
 const TIME_SLOTS = ['9:00 AM', '10:30 AM', '12:00 PM', '2:00 PM', '3:30 PM', '5:00 PM'];
 
+const SALON_LAT = 17.3525582;
+const SALON_LNG = 78.5519718;
+
+function deg2rad(deg) { return deg * (Math.PI/180); }
+function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
+  var R = 6371;
+  var dLat = deg2rad(lat2-lat1);
+  var dLon = deg2rad(lon2-lon1); 
+  var a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.sin(dLon/2) * Math.sin(dLon/2); 
+  var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+  return R * c;
+}
+
 function BookingWizard() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -19,6 +32,12 @@ function BookingWizard() {
   const [services, setServices] = useState([]);
   const [staff, setStaff] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // Home Service State
+  const [bookingType, setBookingType] = useState('salon');
+  const [homeLocation, setHomeLocation] = useState(null);
+  const [gpsLoading, setGpsLoading] = useState(false);
+  const [homeAddress, setHomeAddress] = useState('');
 
   // Step 1 State
   const [activeCategory, setActiveCategory] = useState('Hair');
@@ -45,7 +64,6 @@ function BookingWizard() {
       const fetchedStaff = await getActiveStaff();
       setServices(fetchedServices);
       
-      // Auto set active category if pre-selected service exists
       if (preSelectedService) {
         const s = fetchedServices.find(s => s.id === preSelectedService);
         if (s) setActiveCategory(s.category);
@@ -81,6 +99,37 @@ function BookingWizard() {
     fetchBookings();
   }, [selectedDate]);
 
+  const handleDetectLocation = () => {
+    if (!navigator.geolocation) {
+      setError('Geolocation is not supported by your browser.');
+      return;
+    }
+    setGpsLoading(true);
+    navigator.geolocation.getCurrentPosition((position) => {
+      const lat = position.coords.latitude;
+      const lng = position.coords.longitude;
+      const dist = getDistanceFromLatLonInKm(lat, lng, SALON_LAT, SALON_LNG);
+      
+      let f = 0;
+      if (dist <= 2) f = 50;
+      else if (dist <= 5) f = 100;
+      else if (dist <= 10) f = 150;
+      
+      if (f === 0 && dist > 10) {
+        setError('Sorry, you are outside our 10km service radius. (' + dist.toFixed(1) + 'km away)');
+        setGpsLoading(false);
+        return;
+      }
+      
+      setHomeLocation({ lat, lng, distance: dist, fee: f });
+      setGpsLoading(false);
+      setError('');
+    }, (err) => {
+      setError('Failed to get location. Please enable GPS permissions.');
+      setGpsLoading(false);
+    });
+  };
+
   const selectedService = services.find(s => s.id === selectedServiceId);
   const selectedStylist = staff.find(s => s.id === selectedStylistId);
 
@@ -102,23 +151,25 @@ function BookingWizard() {
   const handleConfirm = () => {
     setError('');
     startTransition(async () => {
-      // Create a proper date string for the DB (using current month/year for demo)
       const now = new Date();
       const dateString = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(selectedDate).padStart(2, '0')}`;
 
-      // Convert time to 24h format for DB
       const [time, modifier] = selectedTime.split(' ');
       let [hours, minutes] = time.split(':');
       if (hours === '12') hours = '00';
       if (modifier === 'PM') hours = parseInt(hours, 10) + 12;
       const timeString = `${hours}:${minutes}:00`;
 
+      const finalPrice = (selectedService?.price || 0) + (bookingType === 'home' ? homeLocation?.fee || 0 : 0);
+      const notes = bookingType === 'home' ? `HOME SERVICE (Fee: ₹${homeLocation.fee}, Dist: ${homeLocation.distance.toFixed(1)}km). Address: ${homeAddress}` : null;
+
       const result = await createAppointment({
         serviceId: selectedServiceId,
         staffId: selectedStylistId === 'any' ? null : selectedStylistId,
         date: dateString,
         time: timeString,
-        totalAmount: selectedService.price,
+        totalAmount: finalPrice,
+        notes: notes
       });
 
       if (result.error) {
@@ -166,24 +217,58 @@ function BookingWizard() {
         {currentStep === 1 && (
           <div className={styles.stepContent}>
             <h2 className={styles.sectionTitle}>Select a Service</h2>
-            <div className={styles.categoryTabs}>
-              {categories.map(cat => (
-                <button key={cat} className={`${styles.categoryTab} ${activeCategory === cat ? styles.categoryTabActive : ''}`} onClick={() => setActiveCategory(cat)}>
-                  {cat}
+            
+            <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem' }}>
+              <button 
+                onClick={() => { setBookingType('salon'); setSelectedServiceId(null); setError(''); }} 
+                style={{ flex: 1, padding: '1rem', borderRadius: '8px', border: bookingType==='salon' ? '2px solid var(--primary)' : '1px solid var(--border)', background: bookingType==='salon' ? 'var(--primary-dark)' : 'var(--surface)', color: 'white' }}>
+                📍 At Salon
+              </button>
+              <button 
+                onClick={() => { setBookingType('home'); setSelectedServiceId(null); setError(''); }} 
+                style={{ flex: 1, padding: '1rem', borderRadius: '8px', border: bookingType==='home' ? '2px solid var(--primary)' : '1px solid var(--border)', background: bookingType==='home' ? 'var(--primary-dark)' : 'var(--surface)', color: 'white' }}>
+                🏠 At Home
+              </button>
+            </div>
+
+            {bookingType === 'home' && !homeLocation ? (
+              <div style={{ padding: '2rem', textAlign: 'center', background: 'var(--surface)', borderRadius: '12px' }}>
+                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📍</div>
+                <h3>Check Availability</h3>
+                <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem', marginTop: '0.5rem' }}>We need your location to check if you are within our 10km service radius.</p>
+                <button onClick={handleDetectLocation} className={styles.btnPrimary} disabled={gpsLoading}>
+                  {gpsLoading ? 'Detecting...' : 'Detect My Location'}
                 </button>
-              ))}
-            </div>
-            <div className={styles.serviceList}>
-              {services.filter(s => s.category === activeCategory).map(service => (
-                <div key={service.id} className={`${styles.serviceCard} ${selectedServiceId === service.id ? styles.serviceCardSelected : ''}`} onClick={() => setSelectedServiceId(service.id)}>
-                  <div className={styles.serviceInfo}>
-                    <div className={styles.serviceName}>{service.name.split('|||')[0].trim()}</div>
-                    <div className={styles.serviceDetails}>{service.duration_minutes} min • {service.category}</div>
-                  </div>
-                  <div className={styles.servicePrice}>₹{service.price}</div>
+              </div>
+            ) : (
+              <>
+                <div className={styles.categoryTabs}>
+                  {categories.map(cat => (
+                    <button key={cat} className={`${styles.categoryTab} ${activeCategory === cat ? styles.categoryTabActive : ''}`} onClick={() => setActiveCategory(cat)}>
+                      {cat}
+                    </button>
+                  ))}
                 </div>
-              ))}
-            </div>
+                <div className={styles.serviceList}>
+                  {services
+                    .filter(s => s.category === activeCategory)
+                    .filter(s => {
+                      if (bookingType === 'salon') return true;
+                      const n = s.name.split('|||')[0].trim().toLowerCase();
+                      return n === 'hair cutting' || n === 'hair cutting + beard cutting' || n === 'hair cutting + beard cutting + hair coloring' || n === 'hair cutting + hair coloring';
+                    })
+                    .map(service => (
+                      <div key={service.id} className={`${styles.serviceCard} ${selectedServiceId === service.id ? styles.serviceCardSelected : ''}`} onClick={() => setSelectedServiceId(service.id)}>
+                        <div className={styles.serviceInfo}>
+                          <div className={styles.serviceName}>{service.name.split('|||')[0].trim()}</div>
+                          <div className={styles.serviceDetails}>{service.duration_minutes} min • {service.category}</div>
+                        </div>
+                        <div className={styles.servicePrice}>₹{service.price}</div>
+                      </div>
+                  ))}
+                </div>
+              </>
+            )}
           </div>
         )}
 
@@ -209,11 +294,22 @@ function BookingWizard() {
             <h2 className={styles.sectionTitle}>Select Date</h2>
             <div className={styles.calendar}>
               <div className={styles.daysGrid}>
-                {Array.from({length: 30}, (_, i) => i + 1).map(i => (
-                  <div key={i} className={`${styles.dayCell} ${i < 15 ? styles.dayPast : styles.dayAvailable} ${selectedDate === i ? styles.daySelected : ''}`} onClick={() => i >= 15 && setSelectedDate(i)}>
-                    {i}
-                  </div>
-                ))}
+                {Array.from({length: 30}, (_, i) => i + 1).map(i => {
+                  const today = new Date().getDate();
+                  const isPast = i < today;
+                  const isToday = i === today;
+                  const isDisabled = isPast || (bookingType === 'home' && isToday);
+                  return (
+                    <div 
+                      key={i} 
+                      className={`${styles.dayCell} ${isDisabled ? styles.dayPast : styles.dayAvailable} ${selectedDate === i ? styles.daySelected : ''}`} 
+                      onClick={() => !isDisabled && setSelectedDate(i)}
+                      style={isDisabled ? { opacity: 0.3 } : {}}
+                    >
+                      {i}
+                    </div>
+                  );
+                })}
               </div>
             </div>
             {selectedDate && (
@@ -255,9 +351,24 @@ function BookingWizard() {
                 <div className={styles.summaryLabel}>Time</div>
                 <div className={styles.summaryValue}>{selectedDate}th, {selectedTime}</div>
               </div>
+              <div className={styles.summaryRow}>
+                <div className={styles.summaryLabel}>Location</div>
+                <div className={styles.summaryValue}>{bookingType === 'salon' ? '📍 At Salon' : '🏠 At Home'}</div>
+              </div>
+              {bookingType === 'home' && (
+                <div className={styles.summaryRow}>
+                  <div className={styles.summaryLabel}>Home Service Fee ({homeLocation?.distance?.toFixed(1)}km)</div>
+                  <div className={styles.summaryValue}>+₹{homeLocation?.fee}</div>
+                </div>
+              )}
+              {bookingType === 'home' && (
+                <div style={{ marginBottom: '1.5rem', marginTop: '1rem' }}>
+                  <input type="text" placeholder="House No, Street, Landmark" value={homeAddress} onChange={e => setHomeAddress(e.target.value)} style={{ width: '100%', padding: '1rem', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'white' }} required={bookingType === 'home'} />
+                </div>
+              )}
               <div className={styles.totalRow}>
                 <div>Total</div>
-                <div>₹{selectedService?.price}</div>
+                <div>₹{(selectedService?.price || 0) + (bookingType === 'home' ? homeLocation?.fee || 0 : 0)}</div>
               </div>
             </div>
             <div className={styles.paymentOptions}>
@@ -274,11 +385,19 @@ function BookingWizard() {
           <button className={`${styles.btn} ${styles.btnBack}`} onClick={handleBack} disabled={isPending}>Back</button>
         )}
         {currentStep < totalSteps ? (
-          <button className={`${styles.btn} ${styles.btnNext}`} onClick={handleNext} disabled={(currentStep === 1 && !selectedServiceId) || (currentStep === 3 && (!selectedDate || !selectedTime))}>
+          <button 
+            className={`${styles.btn} ${styles.btnNext}`} 
+            onClick={handleNext} 
+            disabled={(currentStep === 1 && (!selectedServiceId || (bookingType === 'home' && !homeLocation))) || (currentStep === 3 && (!selectedDate || !selectedTime))}
+          >
             Next
           </button>
         ) : (
-          <button className={styles.btnPrimary} onClick={handleConfirm} disabled={isPending}>
+          <button 
+            className={styles.btnPrimary} 
+            onClick={handleConfirm} 
+            disabled={isPending || (bookingType === 'home' && !homeAddress)}
+          >
             {isPending ? 'Confirming...' : 'Confirm Booking'}
           </button>
         )}
