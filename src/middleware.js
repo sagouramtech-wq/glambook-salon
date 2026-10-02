@@ -8,7 +8,7 @@ export async function middleware(request) {
   const { pathname } = request.nextUrl;
 
   // Paths that require ADMIN role
-  const adminPaths = ['/dashboard', '/calendar', '/crm', '/staff', '/marketing'];
+  const adminPaths = ['/dashboard', '/calendar', '/crm', '/staff', '/marketing', '/services', '/inventory', '/sales', '/subscriptions'];
   
   // Paths that require CUSTOMER role (or any logged in user)
   const customerPaths = ['/', '/booking', '/profile', '/rewards', '/store', '/try-on'];

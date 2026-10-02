@@ -190,7 +190,7 @@ function CustomerHomeContent() {
         <section className={styles.popularSection}>
           <div className={styles.sectionHeader}>
             <h2 className={styles.sectionTitle}>Popular Services</h2>
-            <Link href="/services" className={styles.seeAll}>See All</Link>
+            <Link href="/booking" className={styles.seeAll}>See All</Link>
           </div>
           
           <div className={styles.servicesHorizontalScroll}>
