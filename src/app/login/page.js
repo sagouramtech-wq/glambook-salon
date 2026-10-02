@@ -107,6 +107,9 @@ function LoginForm() {
       <div className={styles.hero}>
         <h1 className={styles.title}>Rishi Hairstyles</h1>
         <p className={styles.tagline}>Your Beauty, Our Priority</p>
+        <div className={styles.heroImageWrapper}>
+          <img src="/images/barber-login.jpg" alt="Barber Cutting Hair" className={styles.heroImage} />
+        </div>
       </div>
 
       <div className={styles.formContainer}>

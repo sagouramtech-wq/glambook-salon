@@ -246,3 +246,27 @@
 }
 
 .error { color: var(--error, #EF5350); text-align: center; font-size: 0.9rem; margin-bottom: 0.5rem; }
+
+.heroImageWrapper {
+  margin-top: 1.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.heroImage {
+  width: 180px;
+  height: 180px;
+  object-fit: contain;
+  /* This blends the black background of the image into the dark UI */
+  mix-blend-mode: screen; 
+  opacity: 0.9;
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
