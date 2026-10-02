@@ -11,17 +11,18 @@ export async function middleware(request) {
   const adminPaths = ['/dashboard', '/calendar', '/crm', '/staff', '/marketing'];
   
   // Paths that require CUSTOMER role (or any logged in user)
-  const customerPaths = ['/booking', '/profile', '/rewards'];
+  const customerPaths = ['/', '/booking', '/profile', '/rewards', '/store', '/try-on'];
 
   // Paths that require STAFF role
   const staffPaths = ['/staff-portal'];
 
   const isAdminPath = adminPaths.some(p => pathname.startsWith(p));
-  const isCustomerPath = customerPaths.some(p => pathname.startsWith(p));
+  const isCustomerPath = customerPaths.some(p => pathname === p || pathname.startsWith(p + '/'));
   const isStaffPath = staffPaths.some(p => pathname.startsWith(p));
 
-  if (!isAdminPath && !isCustomerPath && !isStaffPath) {
-    return NextResponse.next(); // Public paths (e.g., '/', '/login', '/store')
+  // If it's a public path like login or API, let it through
+  if (pathname.startsWith('/login') || pathname.startsWith('/api') || pathname.startsWith('/_next') || pathname.includes('.')) {
+    return NextResponse.next();
   }
 
   // 1. Get the session cookie
@@ -40,12 +41,10 @@ export async function middleware(request) {
 
     // 3. Enforce Role Security
     if (isAdminPath && payload.role !== 'admin') {
-      // Trying to access Admin Dashboard without admin role -> Kick them to home page
       return NextResponse.redirect(new URL('/', request.url));
     }
 
     if (isStaffPath && payload.role !== 'staff' && payload.role !== 'admin') {
-      // Trying to access Staff Portal without staff/admin role -> Kick them to home page
       return NextResponse.redirect(new URL('/', request.url));
     }
 
@@ -57,17 +56,15 @@ export async function middleware(request) {
   }
 }
 
-// Optimize middleware to only run on relevant paths
 export const config = {
   matcher: [
-    '/dashboard/:path*', 
-    '/calendar/:path*', 
-    '/crm/:path*', 
-    '/staff/:path*', 
-    '/marketing/:path*',
-    '/booking/:path*',
-    '/profile/:path*',
-    '/rewards/:path*',
-    '/staff-portal/:path*'
+    /*
+     * Match all request paths except for the ones starting with:
+     * - api (API routes)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     */
+    '/((?!api|_next/static|_next/image|favicon.ico).*)',
   ],
 };

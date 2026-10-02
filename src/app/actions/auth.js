@@ -2,6 +2,10 @@
 
 import { supabaseAdmin } from '@/lib/supabase';
 import { createSession, deleteSession } from '@/lib/session';
+import { cookies } from 'next/headers';
+import { jwtVerify } from 'jose';
+const secretKey = process.env.SESSION_SECRET || 'fallback_secret_for_development_only_123!';
+const encodedKey = new TextEncoder().encode(secretKey);
 import bcrypt from 'bcryptjs';
 
 export async function loginOrRegister(prevState, formData) {
@@ -32,7 +36,7 @@ export async function loginOrRegister(prevState, formData) {
 
     // Success -> Create Session
     await createSession(user.id, user.role);
-    return { success: true, role: user.role };
+    return { success: true, role: user.role, needsName: !user.full_name };
 
   } else {
     // 3. User does not exist -> Register
@@ -63,10 +67,28 @@ export async function loginOrRegister(prevState, formData) {
 
     // Success -> Create Session
     await createSession(newUser.id, newUser.role);
-    return { success: true, role: newUser.role };
+    return { success: true, role: newUser.role, needsName: true };
   }
 }
 
 export async function logout() {
   await deleteSession();
+}
+
+export async function updateUserName(formData) {
+  const name = formData.get('name');
+  if (!name) return { error: 'Name is required' };
+  
+  const cookieStore = await cookies();
+  const sessionToken = cookieStore.get('session')?.value;
+  if (!sessionToken) return { error: 'Unauthorized' };
+  
+  try {
+    const { payload } = await jwtVerify(sessionToken, encodedKey, { algorithms: ['HS256'] });
+    const { error } = await supabaseAdmin.from('users').update({ full_name: name }).eq('id', payload.userId);
+    if (error) return { error: error.message };
+    return { success: true };
+  } catch (err) {
+    return { error: 'Session invalid' };
+  }
 }

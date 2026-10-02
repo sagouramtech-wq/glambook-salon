@@ -3,7 +3,7 @@
 import React, { useState, useTransition, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import styles from './login.module.css';
-import { loginOrRegister } from '@/app/actions/auth';
+import { loginOrRegister, updateUserName } from '@/app/actions/auth';
 import { Fingerprint } from 'lucide-react';
 import { startAuthentication } from '@simplewebauthn/browser';
 
@@ -12,6 +12,8 @@ function LoginForm() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isPending, startTransition] = useTransition();
+  const [needsNameForm, setNeedsNameForm] = useState(false);
+  const [name, setName] = useState('');
   const router = useRouter();
   const searchParams = useSearchParams();
   const source = searchParams.get('source');
@@ -38,6 +40,8 @@ function LoginForm() {
           router.push('/dashboard');
         } else if (result.role === 'staff') {
           router.push('/staff-portal');
+        } else if (result.needsName) {
+          setNeedsNameForm(true);
         } else {
           // If customer and source is walkin, preserve it!
           if (source === 'walkin') {
@@ -46,6 +50,22 @@ function LoginForm() {
             router.push('/');
           }
         }
+      }
+    });
+  };
+
+  
+  const handleNameSubmit = (e) => {
+    e.preventDefault();
+    setError('');
+    const formData = new FormData();
+    formData.append('name', name);
+    startTransition(async () => {
+      const res = await updateUserName(formData);
+      if (res?.error) setError(res.error);
+      else {
+        if (source === 'walkin') router.push('/?source=walkin');
+        else router.push('/');
       }
     });
   };
@@ -96,7 +116,30 @@ function LoginForm() {
           </div>
         )}
       
-        <form className={styles.form} onSubmit={handleSubmit}>
+        {needsNameForm ? (
+          <form className={styles.form} onSubmit={handleNameSubmit}>
+            <div style={{ textAlign: 'center', marginBottom: '1rem', color: 'var(--text)' }}>
+              <h3>Welcome to Rishi Hairstyles!</h3>
+              <p style={{ color: 'var(--text-muted)' }}>What should we call you?</p>
+            </div>
+            {error && <div className={styles.error}>{error}</div>}
+            <div className={styles.inputGroup}>
+              <input
+                type="text"
+                className={styles.input}
+                placeholder="Your Full Name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+                style={{ width: '100%', paddingLeft: '1rem' }}
+              />
+            </div>
+            <button type="submit" className={styles.btnPrimary} disabled={isPending}>
+              {isPending ? 'Saving...' : 'Enter Salon'}
+            </button>
+          </form>
+        ) : (
+          <form className={styles.form} onSubmit={handleSubmit}>
           {error && <div className={styles.error}>{error}</div>}
           
           <div className={styles.inputGroup}>
@@ -131,8 +174,8 @@ function LoginForm() {
             {isPending ? 'Authenticating...' : (source === 'walkin' ? 'Continue to Book' : 'Continue')}
           </button>
         </form>
-
-        <div className={styles.divider}>
+        )} 
+        {!needsNameForm && <div className={styles.divider}>
           <span>or log in instantly with</span>
         </div>
 
@@ -140,6 +183,7 @@ function LoginForm() {
           <Fingerprint size={20} />
           <span>Use Passkey / Biometrics</span>
         </button>
+        )}
 
         <p className={styles.footerText}>
           By continuing, you agree to our <a href="#" className={styles.footerLink}>Terms</a> & <a href="#" className={styles.footerLink}>Privacy Policy</a>
