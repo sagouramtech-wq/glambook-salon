@@ -18,7 +18,9 @@ function CustomerHomeContent() {
   const [banners, setBanners] = useState([
     { id: 1, title: 'Welcome to Rishi Hairstyles!' }
   ]);
-  const [popularServices, setPopularServices] = useState([]);
+    const [popularServices, setPopularServices] = useState([]);
+  const [allPopularServices, setAllPopularServices] = useState([]);
+  const [activeCategoryFilter, setActiveCategoryFilter] = useState(null);
   const [loading, setLoading] = useState(true);
   
   // Walk-in modal state
@@ -54,6 +56,17 @@ function CustomerHomeContent() {
     }
     loadData();
   }, [source]);
+
+  
+  const handleCategoryClick = (categoryName) => {
+    if (activeCategoryFilter === categoryName) {
+      setActiveCategoryFilter(null);
+      setPopularServices(allPopularServices);
+    } else {
+      setActiveCategoryFilter(categoryName);
+      setPopularServices(allPopularServices.filter(s => s.category.toLowerCase() === categoryName.toLowerCase()));
+    }
+  };
 
   const handleScroll = (e) => {
     const scrollLeft = e.target.scrollLeft;
@@ -178,7 +191,7 @@ function CustomerHomeContent() {
           <h2 className={styles.sectionTitle}>Categories</h2>
           <div className={styles.categoryGrid}>
             {dynamicCategories.map((category) => (
-              <div key={category.name} className={styles.categoryCard}>
+              <div key={category.name} className={styles.categoryCard} onClick={() => handleCategoryClick(category.name)} style={{ border: activeCategoryFilter === category.name ? '2px solid var(--primary)' : '1px solid rgba(255,255,255,0.05)', background: activeCategoryFilter === category.name ? 'rgba(201, 168, 76, 0.1)' : 'var(--surface)', cursor: 'pointer', transition: 'all 0.2s ease' }}>
                 <span className={styles.categoryIcon}>{category.icon}</span>
                 <span className={styles.categoryName}>{category.name}</span>
               </div>
