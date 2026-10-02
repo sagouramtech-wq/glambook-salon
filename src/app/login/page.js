@@ -178,14 +178,17 @@ function LoginForm() {
           </button>
         </form>
         )} 
-        {!needsNameForm && <div className={styles.divider}>
-          <span>or log in instantly with</span>
-        </div>
+        {!needsNameForm && (
+          <>
+            <div className={styles.divider}>
+              <span>or log in instantly with</span>
+            </div>
 
-        <button type="button" className={styles.btnGoogle} onClick={handleBiometricLogin}>
-          <Fingerprint size={20} />
-          <span>Use Passkey / Biometrics</span>
-        </button>
+            <button type="button" className={styles.btnGoogle} onClick={handleBiometricLogin}>
+              <Fingerprint size={20} />
+              <span>Use Passkey / Biometrics</span>
+            </button>
+          </>
         )}
 
         <p className={styles.footerText}>
