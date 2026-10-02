@@ -3,7 +3,7 @@ import { supabaseAdmin } from '@/lib/supabase';
 import { rpID, expectedOrigin, getChallenge, clearChallenge } from '@/lib/webauthn';
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import { createToken } from '@/lib/jwt'; // Assumes you have a JWT utility or similar session maker
+
 // We will also import createSession if needed. Let's adapt based on existing auth.
 import { createSession } from '@/lib/session';
 
