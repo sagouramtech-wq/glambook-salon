@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React from 'react';
 import Link from 'next/link';
@@ -70,7 +70,7 @@ export default function ProfilePage() {
             <h3>Gold Member - Monthly Haircut Plan</h3>
             <p>Next: Oct 15 • Renewal: Nov 1</p>
           </div>
-          <button className={styles.manageBtn}>Manage</button>
+          <button className={styles.manageBtn} onClick={() => router.push('/profile/subscriptions')}>Manage</button>
         </div>
       </div>
 
