@@ -19,7 +19,8 @@ function CustomerHomeContent() {
     { id: 1, title: 'Welcome to Rishi Hairstyles!' }
   ]);
     const [popularServices, setPopularServices] = useState([]);
-  const [allPopularServices, setAllPopularServices] = useState([]);
+  const [allServicesState, setAllServicesState] = useState([]);
+  const [basePopularServices, setBasePopularServices] = useState([]);
   const [activeCategoryFilter, setActiveCategoryFilter] = useState(null);
   const [loading, setLoading] = useState(true);
   
@@ -37,8 +38,10 @@ function CustomerHomeContent() {
 
       const popServices = await getPopularServices();
       setPopularServices(popServices);
+      setBasePopularServices(popServices);
       
       const allServices = await getActiveServices();
+      setAllServicesState(allServices);
       // We keep allServices if you need it for the walkin modal drop-down, but the UI shows popServices
 
       
@@ -61,10 +64,10 @@ function CustomerHomeContent() {
   const handleCategoryClick = (categoryName) => {
     if (activeCategoryFilter === categoryName) {
       setActiveCategoryFilter(null);
-      setPopularServices(allPopularServices);
+      setPopularServices(basePopularServices);
     } else {
       setActiveCategoryFilter(categoryName);
-      setPopularServices(allPopularServices.filter(s => (s.category || "").toLowerCase().includes(categoryName.toLowerCase())));
+      setPopularServices(allServicesState.filter(s => (s.category || "").toLowerCase().includes(categoryName.toLowerCase())));
     }
   };
 
