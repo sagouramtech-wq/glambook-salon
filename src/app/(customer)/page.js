@@ -64,7 +64,7 @@ function CustomerHomeContent() {
       setPopularServices(allPopularServices);
     } else {
       setActiveCategoryFilter(categoryName);
-      setPopularServices(allPopularServices.filter(s => s.category.toLowerCase() === categoryName.toLowerCase()));
+      setPopularServices(allPopularServices.filter(s => (s.category || "").toLowerCase().includes(categoryName.toLowerCase())));
     }
   };
 
