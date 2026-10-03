@@ -283,7 +283,7 @@ function BookingWizard() {
                     .filter(s => {
                       if (bookingType === 'salon') return true;
                       const n = s.name.split('|||')[0].trim().toLowerCase();
-                      return n === 'hair cutting' || n === 'hair cutting + beard cutting' || n === 'hair cutting + beard cutting + hair coloring' || n === 'hair cutting + hair coloring';
+                      return n.includes('hair') || n.includes('beard') || n.includes('shaving') || n.includes('colour') || n.includes('color');
                     })
                     .map(service => (
                       <div key={service.id} className={`${styles.serviceCard} ${selectedServiceId === service.id ? styles.serviceCardSelected : ''}`} onClick={() => setSelectedServiceId(service.id)}>
